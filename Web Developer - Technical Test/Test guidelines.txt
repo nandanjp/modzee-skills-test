@@ -1,0 +1,46 @@
+Creative Guild, Full Stack Developer Testing Instructions
+
+Objective:
+The goal of this test is to assess your full-stack web development skills, including front-end, back-end, database design, and deployment. The test will focus on creating a photographer's portfolio platform that allows users to register, log in, view, and manage their profile and gallery.
+
+Resources:
+You will find all the required resources within the technical test folder.
+landscapes.json: Use this sample JSON file as a reference for the data structure you will implement in the back-end (photographer's profile details, gallery images, etc.).
+img (folder): This folder contains images for the logo, gallery, and profile section.
+creative (folder): This folder contains the design and user flow ideas for the application. Feel free to suggest your own user interface ideas.
+
+Requirements:
+I - Front-End
+Develop the "Register", "Reset Password", "Change Password", "Login", and "Profile" screens, ensuring proper form validations. Fetch data from the back-end Laravel API and display it in the user interface.
+Use any front-end framework (preferably Vue.js or Nuxt.js) and libraries you find helpful for the development process.
+Implement custom CSS styles using Flexbox for each user interface element, adhering to the design guidelines provided in the creative folder. Do not use CSS frameworks like Bootstrap or Tailwind CSS.
+Bonus points for additional UI or UX ideas outside the provided creative guidelines.
+
+II - Back-End
+Design a MySQL database based on the provided data structure (landscapes.json) and implement a Laravel back-end.
+Develop RESTful APIs for user registration, login, profile management, and gallery management.
+Registration: Full Name, email, phone number, and bio. Send a registration confirmation email using Laravel job queues.
+Reset Password: Email a reset password code (active for 24 hours).
+Implement authentication and authorization using JSON Web Tokens or session tokens.
+Develop necessary models/controllers (e.g., Photographer, Gallery, Photo).
+III - Storage and Email
+Save profile pictures to an Amazon S3 bucket using the Laravel AWS SDK plugin during registration.
+Send a registration confirmation email using Laravel job queues.
+IV - Deployment
+Dockerize the application, including both front-end and back-end components.
+Deploy the Vue.js or Nuxt.js front-end on AWS S3 and configure it to work with the back-end API.
+Bonus Feature: Deploy the Laravel back-end as an AWS Lambda function and use AWS RDS for the database.
+
+
+Documentation, Roadmap, and Time Tracking:
+Provide comprehensive documentation for the entire application, including setup instructions, API usage, and deployment guidelines.
+Create a roadmap outlining the steps taken to complete the test, challenges faced, and their resolutions.
+Mention the total time taken to complete the test.
+
+
+Submission:
+Create and publish a repository (Git / Bitbucket) containing your project, documentation, and roadmap.
+Share the repository link for review.
+
+
+Please ensure your test submission is well-organized, professional, and adheres to the requirements outlined. Good luck!
