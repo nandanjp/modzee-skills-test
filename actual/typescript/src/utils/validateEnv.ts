@@ -10,6 +10,10 @@ export default function validateEnv(): void
             choices: ["development", "production"]
         }),
         PORT: port({ default: 3000 }),
-        JWT_SECRET: str({ default: "" })
+        JWT_SECRET: str({ default: "" }),
+        BUCKET_NAME: str(),
+        BUCKET_REGION: str(),
+        ACCESS_KEY: str(),
+        SECRET_ACCESS_KEY: str(),
     });
 };

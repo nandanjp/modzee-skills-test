@@ -15,11 +15,12 @@ model User {
   name String
   phone String
   email String @unique
+  password String
   bio String
   profilePicture String
   createdAt DateTime @default(now())
-  updatedAt DateTime
-  loggedIn Boolean
+  updatedAt DateTime @default(now())
+  loggedIn Boolean @default(false)
   album Photo[]
   tokens Token[]
 }
@@ -37,7 +38,7 @@ model Photo {
   title String
   description String
   img String
-  data DateTime
+  date DateTime @default(now())
   featured Boolean @default(false)
   userId Int @unique
   user User @relation(fields: [userId], references: [id])
