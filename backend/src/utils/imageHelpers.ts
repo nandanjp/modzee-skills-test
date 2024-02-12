@@ -4,10 +4,10 @@ const getS3Client = () =>
 {
     return new S3Client({
         credentials: {
-            accessKeyId: process.env.ACCESS_KEY as string,
-            secretAccessKey: process.env.SECRET_ACCESS_KEY as string
+            accessKeyId: process.env.AWS_ACCESS_KEY,
+            secretAccessKey: process.env.AWS_SECRET_KEY
         },
-        region: process.env.BUCKET_REGION as string
+        region: process.env.BUCKET_REGION
     });
 };
 
@@ -17,7 +17,7 @@ export const saveImage = async (file: Buffer, fileType: string, fileName: string
     {
         const s3 = getS3Client();
         const response = await s3.send(new PutObjectCommand({
-            Bucket: process.env.BUCKET_REGION as string,
+            Bucket: process.env.BUCKET_REGION,
             Key: fileName,
             Body: file,
             ContentType: fileType,
@@ -41,7 +41,7 @@ export const getImage = async (fileName: string) =>
     {
         const s3 = getS3Client();
         const response = await s3.send(new GetObjectCommand({
-            Bucket: process.env.BUCKET_REGION as string,
+            Bucket: process.env.BUCKET_REGION,
             Key: fileName,
         }));
         if (!response)
@@ -66,7 +66,7 @@ export const deleteImage = async (fileName: string) =>
     {
         const s3 = getS3Client();
         const response = await s3.send(new DeleteObjectCommand({
-            Bucket: process.env.BUCKET_REGION as string,
+            Bucket: process.env.BUCKET_REGION,
             Key: fileName,
         }));
         if (!response)

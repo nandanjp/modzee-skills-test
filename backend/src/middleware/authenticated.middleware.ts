@@ -31,6 +31,13 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
                 message: "The authenticated user was not found and may no longer exist..."
             });
         }
+        if (!user.verified)
+        {
+            return res.status(StatusCodes.UNAUTHORIZED).json({
+                status: StatusCodes.UNAUTHORIZED,
+                message: "The user's email has not been verified yet....."
+            });
+        }
 
         req.user = user;
         next();

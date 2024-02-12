@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const SignUpUserSchema = {
@@ -17,4 +18,8 @@ export const LoginUserSchema = {
         email: zfd.text().default(""),
         password: zfd.text().default("")
     })
+};
+
+export const VerifyUserSchema = {
+    query: z.object({ token: z.string() })
 };

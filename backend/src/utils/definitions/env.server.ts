@@ -2,12 +2,21 @@ import { z, TypeOf } from "zod";
 const zodEnv = z.object({
     // Database
     DATABASE_URL: z.string(),
-    // Cloudflare
-    CLOUDFLARE_IMAGES_ACCOUNT_ID: z.string(),
-    CLOUDFLARE_IMAGES_API_TOKEN: z.string(),
-    // Sentry
-    SENTRY_DSN: z.string(),
-    SENTRY_RELEASE: z.string().optional(),
+    // AWS
+    AWS_ACCESS_KEY: z.string(),
+    AWS_SECRET_KEY: z.string(),
+    BUCKET_NAME: z.string(),
+    BUCKET_REGION: z.string(),
+    // Port
+    PORT: z.number().default(5000),
+    //Node environment
+    NODE_ENV: z.string().default("development"),
+    //jwt secret
+    JWT_SECRET: z.string(),
+    EMAIL_SECRET: z.string(),
+    //nodemailer auth
+    EMAIL_USER: z.string(),
+    EMAIL_PASS: z.string(),
 });
 declare global
 {

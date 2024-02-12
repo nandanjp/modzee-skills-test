@@ -1,6 +1,5 @@
 import "dotenv/config";
 import "module-alias/register";
-import validateEnv from "@/utils/validateEnv";
 
 import compression from "compression";
 import cors from "cors";
@@ -13,9 +12,6 @@ import { StatusCodes } from "http-status-codes";
 import userRoutes from "@/resources/user/user.routes";
 import photoRoutes from "@/resources/photo/photo.routes";
 import authRoutes from "@/resources/auth/auth.routes";
-
-
-validateEnv();
 
 const app = express();
 

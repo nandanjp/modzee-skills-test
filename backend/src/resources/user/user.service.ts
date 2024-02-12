@@ -141,3 +141,34 @@ export async function AddPhotoToUserAlbum(userId: z.infer<typeof CreateUserAlbum
         throw new Error(`Failed to create a new photo and add it to the user's album: ${error}`);
     }
 }
+
+export async function VerifyUser(userId: z.infer<typeof GetUserByIdSchema.params>)
+{
+    try
+    {
+        const user = await GetUserById(userId);
+        if (!user)
+        {
+            throw new Error(`Failed to retrieve a user with the id: ${userId}`);
+        }
+        const verifiedUser = await prisma.user.update({
+            data: {
+                ...user,
+                verified: true
+            },
+            where: {
+                id: user.id,
+                email: user.email
+            }
+        });
+
+        if (!verifiedUser)
+        {
+            throw new Error(`Failed to verify/update the user's verification status: ${verifiedUser}`);
+        }
+        return verifiedUser;
+    } catch (error)
+    {
+
+    }
+}
