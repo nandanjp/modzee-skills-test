@@ -11,9 +11,9 @@ export const GetPhotosSchema = {
     body: undefined
 };
 
-export const GetPhotoIdSchemas = {
+export const GetPhotoIdSchema = {
     params: z.object({
-        id: z.number()
+        id: z.string()
     }),
     query: undefined,
     body: undefined,
@@ -26,13 +26,14 @@ export const CreatePhotoSchema = {
         title: zfd.text(),
         description: zfd.text(),
         img: zfd.file(),
-        featured: zfd.checkbox()
+        featured: zfd.checkbox(),
+        forUser: zfd.text(),
     })
 };
 
 export const UpdatePhotoSchema = {
     params: z.object({
-        id: z.number()
+        id: z.string()
     }),
     query: undefined,
     body: zfd.formData({
@@ -45,7 +46,7 @@ export const UpdatePhotoSchema = {
 
 export const DeletePhotoSchema = {
     params: z.object({
-        id: z.number()
+        id: z.string()
     }),
     query: undefined,
     body: undefined

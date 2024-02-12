@@ -1,22 +1,22 @@
 import jwt from "jsonwebtoken";
 import { User } from "@prisma/client";
-import IToken from "@/utils/interfaces/token.interface";
+import { Response } from "express";
 
-export const createToken = (user: User): string =>
+export const createToken = (user: User, res: Response): string =>
 {
-    return jwt.sign({ id: user.id }, process.env.JWT_SECRET as jwt.Secret, {
-        expiresIn: 'id'
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as jwt.Secret, {
+        expiresIn: '1d'
     });
+    res.cookie("jwt", token, {
+        maxAge: 15 * 24 * 60 * 60 * 1000, //MS
+        httpOnly: true,
+        sameSite: "strict"
+    });
+
+    return token;
 };
 
-export const verifyToken = async (token: string): Promise<jwt.VerifyErrors | IToken> =>
+export const verifyToken = (token: string) =>
 {
-    return new Promise((resolve, reject) =>
-    {
-        jwt.verify(token, process.env.JWT_SECRET as jwt.Secret, (err, payload) =>
-        {
-            if (err) reject(err);
-            resolve(payload as IToken);
-        });
-    });
+    return jwt.verify(token, process.env.JWT_SECRET as jwt.Secret) as { id: string, expiresIn: number; };
 };

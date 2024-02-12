@@ -1,4 +1,4 @@
-import { number, z } from "zod";
+import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const GetUsersSchema = {
@@ -44,6 +44,7 @@ export const CreateUserSchema = {
         phone: zfd.text().default(""),
         email: zfd.text().default(""),
         password: zfd.text().default(""),
+        confirmPassword: zfd.text().default(""),
         bio: zfd.text().default(""),
         profilePicture: zfd.file(),
     })
@@ -52,31 +53,20 @@ export const CreateUserSchema = {
 export const CreateUserAlbumSchema = {
     query: undefined,
     params: z.object({
-        id: number()
+        id: z.string()
     }),
     body: zfd.formData({
-        picture: zfd.file().array(),
-    })
-};
-
-export const UpdateUserSchema = {
-    query: undefined,
-    params: z.object({
-        id: z.number()
-    }),
-    body: zfd.formData({
-        name: zfd.text().optional(),
-        phone: zfd.text().optional(),
-        email: zfd.text().optional(),
-        bio: zfd.text().optional(),
-        profilePicture: zfd.file().optional(),
+        title: z.string(),
+        description: z.string(),
+        picture: zfd.file(),
+        featured: z.boolean().default(false)
     })
 };
 
 export const DeleteUserSchema = {
     query: undefined,
     params: z.object({
-        id: z.number()
+        id: z.string()
     }),
     body: undefined
 };

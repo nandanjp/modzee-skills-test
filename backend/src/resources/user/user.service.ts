@@ -1,23 +1,13 @@
-import { number, z } from "zod";
-import { CreateUserSchema, GetUserAlbumSchema, GetUserByIdSchema, GetUsersSchema } from "@/resources/user/user.validate";
+import { z } from "zod";
+import { CreateUserAlbumSchema, CreateUserSchema, GetUserAlbumSchema, GetUserByIdSchema, GetUsersSchema } from "@/resources/user/user.validate";
 import { Photo, User } from "@prisma/client";
-import prisma from "../../db";
-import { error } from "console";
+import prisma from "@/utils/db";
 
 export async function GetUsers(queries: z.infer<typeof GetUsersSchema.query>): Promise<User[] | void>
 {
     try
     {
         return await prisma.user.findMany({
-            // select: {
-            // id: true,
-            // name: true,
-            // phone: true,
-            // createdAt: true,
-            // loggedIn: true,
-            // bio: true,
-            // email: true,
-            // },
             where: {
                 name: queries.name,
                 phone: queries.phone,
@@ -42,6 +32,21 @@ export async function GetUserById({ id }: z.infer<typeof GetUserByIdSchema.param
     } catch (error)
     {
         throw new Error(`failed to get a user with the given id, ${id}: ${error}`);
+    }
+}
+
+export async function GetUserByEmail({ email }: { email: string; })
+{
+    try
+    {
+        return await prisma.user.findUnique({
+            where: {
+                email
+            }
+        });
+    } catch (error)
+    {
+        throw new Error(`failed to get a user with the given email, ${email}: ${error}`);
     }
 }
 
@@ -86,23 +91,53 @@ export async function CreateUser(user: z.infer<typeof CreateUserSchema.body>)
                     }
                 }
             },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                profilePicture: true,
-                createdAt: true,
-                loggedIn: true,
-            }
+            // select: {
+            //     id: true,
+            //     name: true,
+            //     email: true,
+            //     phone: true,
+            //     profilePicture: true,
+            //     createdAt: true,
+            //     bio: true,
+            // }
         });
         if (!newUser)
         {
             throw new Error("failed to create a new user");
         }
-        return user;
+        return newUser;
     } catch (error)
     {
         throw new Error(`failed to create a new user, ${user}: ${error}`);
+    }
+}
+
+export async function AddPhotoToUserAlbum(userId: z.infer<typeof CreateUserAlbumSchema.params>, picture: z.infer<typeof CreateUserAlbumSchema.body>)
+{
+    try
+    {
+        const user = await GetUserById(userId);
+        if (!user)
+        {
+            throw new Error(`Failed to retrieve a user with the id: ${userId}`);
+        }
+
+        const newPhoto = await prisma.photo.create({
+            data: {
+                userId: parseInt(userId.id),
+                img: picture.picture.name,
+                ...picture
+            }
+        });
+
+        if (!newPhoto)
+        {
+            throw new Error(`Failed to create a new photo`);
+        }
+
+        return newPhoto;
+    } catch (error)
+    {
+        throw new Error(`Failed to create a new photo and add it to the user's album: ${error}`);
     }
 }
