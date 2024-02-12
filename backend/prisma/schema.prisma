@@ -20,17 +20,8 @@ model User {
   profilePicture String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-  loggedIn Boolean @default(false)
+  verified Boolean @default(false)
   album Photo[]
-  tokens Token[]
-}
-
-model Token {
-  token String @unique @id
-  userId Int @unique
-  user User @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  refreshDate DateTime
 }
 
 model Photo {
