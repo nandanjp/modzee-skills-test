@@ -1,3 +1,4 @@
+import { createUser } from "@/resources/user/user.handlers";
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
 
@@ -26,7 +27,7 @@ async function main()
 {
     try
     {
-        const samples = fs.readFileSync("./sample.json", "utf-8");
+        const samples = fs.readFileSync("/home/nandan/projects/skills-test/backend/prisma/sample.json", "utf-8");
         const userData = JSON.parse(samples) as Sampledata;
 
         const createUser = await prisma.user.create({
@@ -37,25 +38,24 @@ async function main()
                 name: userData.name,
                 phone: userData.phone,
                 profilePicture: userData.profile_picture,
+                verified: false,
             }
         });
-        console.log(`Created user: ${createUser}`);
 
-        const createPhotes = await Promise.all(userData.album.map(image =>
+        for (let image of userData.album)
         {
-            prisma.photo.create({
+            await prisma.photo.create({
                 data: {
                     ...image,
+                    date: new Date(image.date),
                     img: image.img,
                     userId: createUser.id
                 }
             });
-        }));
-
-        console.log(`Created images: ${createPhotes}`);
+        }
     } catch (error)
     {
-        console.error(`failed to read in the sample data, could not create the sample data`);
+        console.error(`failed to read in the sample data, could not create the sample data: ${error}`);
     }
 
 }

@@ -10,6 +10,7 @@ export const createPhotoFormValidator = async (req: Request, res: Response, next
     try
     {
         CreatePhotoSchema.body.parse(req.body);
+        next();
     } catch (error)
     {
         next(new HttpException(StatusCodes.BAD_REQUEST, `failed to validate the create photo schema: ${error}`));
@@ -62,7 +63,11 @@ export const createPhoto = async (req: Request, res: Response, next: NextFunctio
     try
     {
         const body = req.body as TypeOf<typeof CreatePhotoSchema.body>;
-        const photo = await CreatePhoto(body);
+        if (!req.file)
+        {
+            return next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to create a photo: did not pass in a picture file`));
+        }
+        const photo = await CreatePhoto(body, req.file);
         if (!photo)
         {
             return next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to create a photo with the given information: ${body}`));

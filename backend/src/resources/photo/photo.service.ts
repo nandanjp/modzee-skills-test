@@ -1,7 +1,7 @@
 import prisma from "@/utils/db";
 import { TypeOf } from "zod";
 import { CreatePhotoSchema, DeletePhotoSchema, GetPhotoIdSchema } from "./photo.validate";
-import { getImage, saveImage } from "@/utils/imageHelpers";
+import { saveImage } from "@/utils/imageHelpers";
 
 export const GetAllPhotos = async () =>
 {
@@ -36,7 +36,7 @@ export const GetPhotoById = async ({ id }: TypeOf<typeof GetPhotoIdSchema.params
     }
 };
 
-export const CreatePhoto = async ({ title, description, img, featured, forUser }: TypeOf<typeof CreatePhotoSchema.body>) =>
+export const CreatePhoto = async ({ title, description, featured, forUser }: TypeOf<typeof CreatePhotoSchema.body>, img: Express.Multer.File) =>
 {
     try
     {
@@ -45,7 +45,7 @@ export const CreatePhoto = async ({ title, description, img, featured, forUser }
                 userId: parseInt(forUser),
                 title,
                 description,
-                img: img.name,
+                img: img.originalname,
                 featured
             }
         });
@@ -54,15 +54,10 @@ export const CreatePhoto = async ({ title, description, img, featured, forUser }
             throw new Error(`Failed to create a photo with the given parameters: ${title}, ${description}, ${forUser}`);
         }
 
-        const response = getImage(img.name);
+        const response = saveImage(img.buffer, img.mimetype, img.originalname);
         if (!response)
         {
-            const buffer = await img.arrayBuffer();
-            const response = saveImage(Buffer.from(buffer), img.type, img.name);
-            if (!response)
-            {
-                throw new Error(`Failed to save the image to the cloud: ${response}`);
-            }
+            throw new Error(`Failed to save the image to the cloud: ${response}`);
         }
 
         return newPhoto;

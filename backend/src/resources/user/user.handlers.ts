@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AddPhotoToUserAlbum, CreateUser, GetUserAlbum, GetUserById, GetUsers } from "@/resources/user/user.service";
 import { StatusCodes } from "http-status-codes";
 import HttpException from "@/utils/exceptions/http.exception";
-import { TypeOf, z } from "zod";
+import { TypeOf } from "zod";
 import { CreateUserAlbumSchema, CreateUserSchema, DeleteUserSchema, GetUserAlbumSchema, GetUserByIdSchema } from "./user.validate";
 import { getImage, saveImage } from "@/utils/imageHelpers";
 import { CreatePhotoSchema } from "../photo/photo.validate";
@@ -36,7 +36,10 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
                 message: `User with the given id, ${params.id}, could not be found`
             });
         }
-        return user;
+        res.status(StatusCodes.OK).json({
+            status: StatusCodes.OK,
+            user
+        });
     } catch (error)
     {
         next(new HttpException(StatusCodes.BAD_REQUEST, `Could not retrieve a user with the given id: ${error}`));
@@ -71,33 +74,20 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 {
     try
     {
-        console.log(req.file);
-        console.log(req.body);
-
-        const userBody = req.body as TypeOf<typeof CreateUserSchema.body>;
-        userBody.profilePicture.name;
-        const newUser = await CreateUser(req.body as TypeOf<typeof CreateUserSchema.body>);
-        if (!newUser)
-        {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                status: StatusCodes.BAD_REQUEST,
-                message: `Failed to create a new user for an unknown reason`
-            });
-        }
         if (!req.file || !req.file.buffer)
         {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                status: StatusCodes.BAD_REQUEST,
-                message: `Failed to save the user's profile image: ${req.file}`
-            });
+            return next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to save the user's profile image: ${req.file}`));
+        }
+
+        const newUser = await CreateUser(req.body as TypeOf<typeof CreateUserSchema.body>, req.file);
+        if (!newUser)
+        {
+            return next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to create a new user for an unknown reason`));
         }
         const fileCreated = await saveImage(req.file?.buffer, req.file?.mimetype, req.file?.originalname);
         if (!fileCreated)
         {
-            return res.status(StatusCodes.BAD_REQUEST).json({
-                status: StatusCodes.BAD_REQUEST,
-                message: `Failed to save the user's profile image: ${req.file}`
-            });
+            return next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to save the user's profile image: ${req.file}`));
         }
 
         res.status(StatusCodes.CREATED).json({
@@ -137,7 +127,7 @@ export const addPictureToUserAlbum = async (req: Request, res: Response, next: N
             }
         }
 
-        const newPhoto = await AddPhotoToUserAlbum(params, body);
+        const newPhoto = await AddPhotoToUserAlbum(params, body, req.file);
         if (!newPhoto)
         {
             return res.status(StatusCodes.BAD_REQUEST).json({
@@ -188,6 +178,7 @@ export const createUserFormValidator = async (req: Request, res: Response, next:
     try
     {
         CreateUserSchema.body.parse(req.body);
+        next();
     } catch (error)
     {
         res.status(StatusCodes.BAD_REQUEST).json({ status: StatusCodes.BAD_REQUEST, error: "failed to parse form data correctly" });
@@ -201,6 +192,7 @@ export const createAlbumFormValidator = async (req: Request, res: Response, next
     try
     {
         CreatePhotoSchema.body.parse(req.body);
+        next();
     } catch (error)
     {
 

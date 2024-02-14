@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CreateUserAlbumSchema, CreateUserSchema, GetUserAlbumSchema, GetUserByIdSchema, GetUsersSchema } from "@/resources/user/user.validate";
 import { Photo, User } from "@prisma/client";
 import prisma from "@/utils/db";
+import { saveImage } from "@/utils/imageHelpers";
 
 export async function GetUsers(queries: z.infer<typeof GetUsersSchema.query>): Promise<User[] | void>
 {
@@ -65,11 +66,11 @@ export async function GetUserAlbum({ id }: z.infer<typeof GetUserAlbumSchema.par
     }
 }
 
-export async function CreateUser(user: z.infer<typeof CreateUserSchema.body>)
+export async function CreateUser(user: z.infer<typeof CreateUserSchema.body>, profile: Express.Multer.File)
 {
     try
     {
-        if (!user.bio || !user.email || !user.password || !user.name || !user.phone || !user.profilePicture)
+        if (!user.bio || !user.email || !user.password || !user.name || !user.phone || !profile)
         {
             throw new Error("cannot have empty fields for properties that the user requires!");
         }
@@ -81,29 +82,25 @@ export async function CreateUser(user: z.infer<typeof CreateUserSchema.body>)
                 password: user.password,
                 name: user.name,
                 phone: user.phone,
-                profilePicture: user.profilePicture.name,
+                profilePicture: profile.originalname,
                 album: {
                     create: {
                         description: "profile picture",
-                        img: user.profilePicture.name,
+                        img: profile.originalname,
                         title: "profile picture",
                         featured: false,
                     }
                 }
             },
-            // select: {
-            //     id: true,
-            //     name: true,
-            //     email: true,
-            //     phone: true,
-            //     profilePicture: true,
-            //     createdAt: true,
-            //     bio: true,
-            // }
         });
         if (!newUser)
         {
             throw new Error("failed to create a new user");
+        }
+        const response = saveImage(profile.buffer, profile.mimetype, profile.originalname);
+        if (!response)
+        {
+            throw new Error(`Failed to save the image to the cloud: ${response}`);
         }
         return newUser;
     } catch (error)
@@ -112,7 +109,7 @@ export async function CreateUser(user: z.infer<typeof CreateUserSchema.body>)
     }
 }
 
-export async function AddPhotoToUserAlbum(userId: z.infer<typeof CreateUserAlbumSchema.params>, picture: z.infer<typeof CreateUserAlbumSchema.body>)
+export async function AddPhotoToUserAlbum(userId: z.infer<typeof CreateUserAlbumSchema.params>, picture: z.infer<typeof CreateUserAlbumSchema.body>, photo: Express.Multer.File)
 {
     try
     {
@@ -125,7 +122,8 @@ export async function AddPhotoToUserAlbum(userId: z.infer<typeof CreateUserAlbum
         const newPhoto = await prisma.photo.create({
             data: {
                 userId: parseInt(userId.id),
-                img: picture.picture.name,
+                img: photo.originalname
+                ,
                 ...picture
             }
         });
@@ -133,6 +131,12 @@ export async function AddPhotoToUserAlbum(userId: z.infer<typeof CreateUserAlbum
         if (!newPhoto)
         {
             throw new Error(`Failed to create a new photo`);
+        }
+
+        const response = saveImage(photo.buffer, photo.mimetype, photo.originalname);
+        if (!response)
+        {
+            throw new Error(`Failed to save the image to the cloud: ${response}`);
         }
 
         return newPhoto;

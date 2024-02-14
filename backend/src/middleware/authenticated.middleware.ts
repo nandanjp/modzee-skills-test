@@ -7,7 +7,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 {
     try
     {
-        const token = req.cookies.jwt;
+        const token = req.headers.cookie?.split("jwt=")[1];
         if (!token)
         {
             return res.status(StatusCodes.UNAUTHORIZED).json({

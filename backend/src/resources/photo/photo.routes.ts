@@ -9,7 +9,7 @@ const router = Router();
 
 router.get(`/`, validationMiddleware(GetPhotosSchema), getPhotos);
 router.get(`/:id`, authenticate, validationMiddleware(GetPhotoIdSchema), getPhotoById);
-router.post(`/`, createPhotoFormValidator, multer({ storage: multer.memoryStorage() }).single("photo"), createPhoto);
+router.post(`/`, multer({ storage: multer.memoryStorage() }).single("img"), createPhotoFormValidator, createPhoto);
 router.delete(`/:id`, authenticate, validationMiddleware(DeletePhotoSchema), deletePhoto);
 
 export default router;

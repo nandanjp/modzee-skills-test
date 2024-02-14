@@ -2,24 +2,29 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const SignUpUserSchema = {
+    query: undefined,
+    params: undefined,
     body: zfd.formData({
-        name: zfd.text().default(""),
-        phone: zfd.text().default(""),
-        email: zfd.text().default(""),
-        password: zfd.text().default(""),
+        name: zfd.text(),
+        phone: zfd.text(),
+        email: zfd.text(),
+        password: zfd.text(),
         confirmPassword: zfd.text().default(""),
         bio: zfd.text().default(""),
-        profilePicture: zfd.file(),
     })
 };
 
 export const LoginUserSchema = {
-    body: zfd.formData({
-        email: zfd.text().default(""),
-        password: zfd.text().default("")
+    query: undefined,
+    params: undefined,
+    body: z.object({
+        email: z.string().default(""),
+        password: z.string().default("")
     })
 };
 
 export const VerifyUserSchema = {
-    query: z.object({ token: z.string() })
+    query: z.object({ id: z.string() }),
+    params: undefined,
+    body: undefined,
 };

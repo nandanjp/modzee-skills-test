@@ -15,6 +15,8 @@ import authRoutes from "@/resources/auth/auth.routes";
 
 const app = express();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));

@@ -25,7 +25,6 @@ export const CreatePhotoSchema = {
     body: zfd.formData({
         title: zfd.text(),
         description: zfd.text(),
-        img: zfd.file(),
         featured: zfd.checkbox(),
         forUser: zfd.text(),
     })
@@ -39,8 +38,7 @@ export const UpdatePhotoSchema = {
     body: zfd.formData({
         title: zfd.text().optional(),
         description: zfd.text().optional(),
-        img: zfd.file().optional(),
-        featured: zfd.checkbox().optional()
+        featured: zfd.checkbox({ trueValue: "true" })
     })
 };
 

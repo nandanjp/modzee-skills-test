@@ -11,21 +11,20 @@ const getS3Client = () =>
     });
 };
 
-export const saveImage = async (file: Buffer, fileType: string, fileName: string): Promise<string | undefined> =>
+export const saveImage = async (file: Buffer, fileType: string, fileName: string) =>
 {
     try
     {
         const s3 = getS3Client();
         const response = await s3.send(new PutObjectCommand({
-            Bucket: process.env.BUCKET_REGION,
-            Key: fileName,
+            Bucket: process.env.BUCKET_NAME,
+            Key: `uploads/${fileName}`,
             Body: file,
             ContentType: fileType,
         }));
-        console.log(response);
         if (!response)
         {
-            return undefined;
+            throw new Error(`Failed to save file to s3: ${response}`);
         }
         return `File successfully created, with the name: ${fileName}`;
     } catch (error)
