@@ -1,34 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useAppDispatch, useAppSelector } from "./app/hooks"
+import { Button } from "./components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./components/ui/card"
+import {
+  amountAdded,
+  decrement,
+  increment,
+} from "./features/counter/counter-slice"
+import { useFetchBreedsQuery } from "./features/dogs/dogs-slice"
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const count = useAppSelector(state => state.counter.value)
+  const dispatch = useAppDispatch()
+  const increments = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
+  const { data } = useFetchBreedsQuery()
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+    <div className="App">
+      <header className="App-header">
+        {/* <img src={logo} className="App-logo" alt="logo" /> */}
+      </header>
+      <div className="flex gap-4 p-4 justify-center items-center">
         <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+          Edit <code>src/App.tsx, count is: {count}</code> and save to reload.
         </p>
+        <div className="grid grid-cols-3 grid-rows-5 gap-4 p-4 justify-center items-center">
+          <Button onClick={() => dispatch(increment())}>increment count</Button>
+          <Button onClick={() => dispatch(decrement())}>decrement count</Button>
+          {increments.map(i => (
+            <Button key={i} onClick={() => dispatch(amountAdded(i))}>
+              add {i} count
+            </Button>
+          ))}
+        </div>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <div className="grid grid-cols-3 grid-rows-3 gap-4 justify-center items-center p-4">
+        <p className="flex justify-center items-center">
+          Number of dogs fetched <code> {data?.length ?? 0} </code> and save to
+          reload.
+        </p>
+        {!data ? (
+          <p>Fetching Data....</p>
+        ) : (
+          data?.map(breed => (
+            <Card key={breed.id}>
+              <CardHeader>
+                <CardTitle>{breed.name}</CardTitle>
+                <CardDescription>{breed.id}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center items-center">
+                <img
+                  src={breed.image.url}
+                  alt={breed.name}
+                  className="rounded-lg w-56 h-56"
+                />
+              </CardContent>
+              <CardFooter>
+                <p>{breed.name}</p>
+              </CardFooter>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
   )
 }
 

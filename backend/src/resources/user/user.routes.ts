@@ -9,12 +9,12 @@ import { GetUsersSchema, GetUserByIdSchema, DeleteUserSchema, GetUserAlbumSchema
 const router = Router();
 
 router.get(`/`, validationMiddleware(GetUsersSchema), getUsers);
-router.post(`/`, createUserFormValidator, multer({ storage: multer.memoryStorage() }).single('profile'), createUser);
+router.post(`/`, multer({ storage: multer.memoryStorage() }).single('profile'), createUserFormValidator, createUser);
 
-router.get(`/:id`, authenticate, validationMiddleware(GetUserByIdSchema), getUserById);
-router.delete(`/:id`, authenticate, validationMiddleware(DeleteUserSchema), deleteUser);
+router.get(`/:id`, validationMiddleware(GetUserByIdSchema), authenticate, getUserById);
+router.delete(`/:id`, validationMiddleware(DeleteUserSchema), authenticate, deleteUser);
 
-router.post(`/:id/album`, authenticate, createAlbumFormValidator, multer({ storage: multer.memoryStorage() }).single('photo'), addPictureToUserAlbum);
-router.get(`/:id/album`, authenticate, validationMiddleware(GetUserAlbumSchema), getUserAlbum);
+router.post(`/:id/album`, authenticate, multer({ storage: multer.memoryStorage() }).single('photo'), createAlbumFormValidator, addPictureToUserAlbum);
+router.get(`/:id/album`, validationMiddleware(GetUserAlbumSchema), authenticate, getUserAlbum);
 
 export default router;

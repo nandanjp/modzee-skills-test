@@ -8,6 +8,21 @@ import { CreateUser, GetUserByEmail, GetUserById, GetUsers, VerifyUser } from "@
 import { LoginUserSchema, SignUpUserSchema, VerifyUserSchema } from "@/resources/auth/auth.validate";
 import nodemailer from "nodemailer";
 
+export const signupFormValidator = async (req: Request, res: Response, next: NextFunction) =>
+{
+    try
+    {
+        console.log(req.body);
+        console.log(req.file);
+        SignUpUserSchema.body.parse(req.body);
+        next();
+    } catch (error)
+    {
+
+        next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to correctly parse the form data: ${error}`));
+    }
+};
+
 export const signupHandler = async (req: Request, res: Response, next: NextFunction) =>
 {
     try
@@ -17,7 +32,11 @@ export const signupHandler = async (req: Request, res: Response, next: NextFunct
         {
             return next(new HttpException(StatusCodes.BAD_REQUEST, `passwords do not match`));
         }
-        const users = await GetUsers({ email: body.email });
+        if (!req.file)
+        {
+            return next(new HttpException(StatusCodes.BAD_REQUEST, `did not pass in a profile picture`));
+        }
+        const users = await GetUserByEmail({ email: body.email });
         if (users)
         {
             return next(new HttpException(StatusCodes.BAD_REQUEST, `User with the email, ${body.email}, already exists`));
@@ -33,27 +52,26 @@ export const signupHandler = async (req: Request, res: Response, next: NextFunct
             email: body.email,
             name: body.name,
             phone: body.phone,
-            profilePicture: body.profilePicture
-        });
+        }, req.file);
 
         if (!newUser)
         {
             return next(new HttpException(StatusCodes.BAD_REQUEST, `Invalid user provided`));
         }
 
-        const info = await nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        }).sendMail({
-            to: newUser.email,
-            subject: 'Confirm your email address',
-            text: `Click the following link to confirm your email address: localhost:5000/api/auth/verify?id=${createToken(newUser, res, "email")}`
-        });
+        // const info = await nodemailer.createTransport({
+        //     service: "gmail",
+        //     auth: {
+        //         user: process.env.EMAIL_USER,
+        //         pass: process.env.EMAIL_PASS
+        //     }
+        // }).sendMail({
+        //     to: newUser.email,
+        //     subject: 'Confirm your email address',
+        //     text: `Click the following link to confirm your email address: localhost:5000/api/auth/verify?id=${createToken(newUser, res, "email")}`
+        // });
 
-        console.log('Email sent:', info);
+        // console.log('Email sent:', info);
         res.status(StatusCodes.CREATED).json({
             id: newUser.id,
             name: newUser.name,
@@ -62,11 +80,11 @@ export const signupHandler = async (req: Request, res: Response, next: NextFunct
             createdAt: newUser.createdAt,
             profilePicture: newUser.profilePicture,
             bio: newUser.bio,
-            message: "An email confirmation was sent. You must verify your email before being able to login."
+            message: `Click the following link to verify your account: localhost:5000/api/auth/verify?id=${createToken(newUser, res, "email")}`
         });
     } catch (error)
     {
-        next(new HttpException(StatusCodes.INTERNAL_SERVER_ERROR, `Failed to create a user`));
+        next(new HttpException(StatusCodes.INTERNAL_SERVER_ERROR, `Failed to signup a user: ${error}`));
     }
 };
 
@@ -126,15 +144,15 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
 {
     try
     {
-        const { token } = req.query as TypeOf<typeof VerifyUserSchema.query>;
-        if (!token)
+        const { id } = req.query as TypeOf<typeof VerifyUserSchema.query>;
+        if (!id)
         {
             return next(new HttpException(StatusCodes.UNAUTHORIZED, `User could not be verified.`));
         }
-        const confirm = verifyToken(token);
+        const confirm = verifyToken(id, "email");
         if (!confirm.id)
         {
-            return next(new HttpException(StatusCodes.UNAUTHORIZED, `Incorrect token provided: could not verify user with the token ${token}`));
+            return next(new HttpException(StatusCodes.UNAUTHORIZED, `Incorrect token provided: could not verify user with the token ${id}`));
         }
 
         const user = await VerifyUser(confirm);
@@ -155,6 +173,6 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
         });
     } catch (error)
     {
-        next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to verify the user`));
+        next(new HttpException(StatusCodes.BAD_REQUEST, `Failed to verify the user: ${error}`));
     }
 };

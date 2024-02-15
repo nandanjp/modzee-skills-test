@@ -46,7 +46,6 @@ export const CreateUserSchema = {
         password: zfd.text().default(""),
         confirmPassword: zfd.text().default(""),
         bio: zfd.text().default(""),
-        profilePicture: zfd.file(),
     })
 };
 
@@ -58,7 +57,6 @@ export const CreateUserAlbumSchema = {
     body: zfd.formData({
         title: z.string(),
         description: z.string(),
-        picture: zfd.file(),
         featured: z.boolean().default(false)
     })
 };

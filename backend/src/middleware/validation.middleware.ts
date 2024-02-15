@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { ZodError, ZodObject } from "zod";
 
-export default (schemas: { params: ZodObject<any, any> | undefined, body: ZodObject<any, any> | undefined, query: ZodObject<any, any> | undefined; }) =>
+const validationMiddleware = (schemas: { params: ZodObject<any, any> | undefined, body: ZodObject<any, any> | undefined, query: ZodObject<any, any> | undefined; }) =>
 {
     return async (req: Request, res: Response, next: NextFunction) =>
     {
@@ -40,3 +40,5 @@ export default (schemas: { params: ZodObject<any, any> | undefined, body: ZodObj
         }
     };
 };
+
+export default validationMiddleware;
