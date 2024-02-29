@@ -6,7 +6,7 @@ import { TypeOf } from "zod";
 import HttpException from "@/utils/exceptions/http.exception";
 import { CreateUser, GetUserByEmail, GetUserById, GetUsers, VerifyUser } from "@/resources/user/user.service";
 import { LoginUserSchema, SignUpUserSchema, VerifyUserSchema } from "@/resources/auth/auth.validate";
-import nodemailer from "nodemailer";
+// import nodemailer from "nodemailer";
 
 export const signupFormValidator = async (req: Request, res: Response, next: NextFunction) =>
 {
@@ -44,7 +44,6 @@ export const signupHandler = async (req: Request, res: Response, next: NextFunct
 
         const salt = await bcrypt.genSalt(10);
         const hashed = await bcrypt.hash(body.password, salt);
-
         const newUser = await CreateUser({
             bio: body.bio,
             confirmPassword: body.confirmPassword,
